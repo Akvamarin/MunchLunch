@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html ng-app="Micropractica1">
+	<head>
+		<style>
+		   .profile{border-style: solid;box-shadow: 1px 2px;width:270px;}
+		   .etiq {margin-left:10px;color:black;font-weight: bold;display:inline-block;width:100px;}
+		   .profile__name {display:inline}
+		   .profile__tfno {display:inline}
+		   .profile__email {display:inline}
+		   #box0{background-color:rgb(244, 122, 66); width:50%;margin-left:25%}
+		   .title{text-align:center}
+		   .left{float:left}
+		   .right{float:right}
+		   .left-centered{float:left; padding-left:20%}
+		   .select{float:left; margin-left:5%}
+		   .button{float:left; margin-left:1%}
+		   .producto{text-decoration: underline;margin-left:5%}
+		   .precio{text-decoration: underline; margin-left: 70%}
+		   .producto-lista{margin-left:5%}
+		   .precio-lista{float:right;margin-right: 3%}
+		   .bold{font-weight: bold}
+		   .right-space{margin-right:3%}
+		   .precio-lista-total{margin-right:9%; float:right}
+		</style>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular-aria.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular-messages.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-material/1.0.5/angular-material.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular-animate.js"></script>
+		
+		<script>
+			<!-- Micropráctica 1 -->
+			var app = angular.module('Micropractica1', []);
+			app.controller('myController', function($scope) {
+				
+				<!-- Definimos la lista de comidas que ofrece el restaurante, separadas por descripción y precio -->
+				$scope.items = [
+					{Desc: "Cerdo agridulce", Price: "5.5€"},
+					{Desc: "Arroz tres delicias", Price: "3.5€"},
+					{Desc: "Ternera con bambú y setas", Price: "7.0€"}
+				];
+				
+				$scope.listaComida = []; <!-- Este array define la lista de productos elegidos por el cliente -->
+				$scope.listaPrecios = []; <!-- Este array define la lista de precios de los productos de la comanda -->
+				
+				<!-- Función para añadir un nuevo elemento a la comanda -->
+				$scope.addToCart = function(){	
+					<!-- Debido a que cogemos desc+price, debemos seleccionar la información que queremos para cada uno de los campos -->
+					<!-- Obtenemos la descripción del plato quitando el precio mediante expresiones regulares -->
+					var comida = $scope.selectedFood.replace(/(5\.5€)|(3\.5€)|(7\.0€)/,"");
+					<!-- Obtenemos el precio del plato quitando la descripción mediante expresiones regulares -->
+					var precio = $scope.selectedFood.replace(/[a-zA-z\sú]*/,"");
+					
+					<!-- Quitamos el euro para que pueda hacer las operaciones correctamente -->
+					var precio_ = precio.replace(/€/,"");
+					<!-- Metemos el precio del producto que acaba de ser añadido a la comanda a listaPrecios -->
+					$scope.listaPrecios.push(precio_);
+					
+					<!-- Metemos la tupla (comida, precio) que acaba de ser añadido a la comanda a listaComida -->
+					$scope.listaComida.push({
+						Desc: comida, <!-- Descripción -->
+						Price: precio <!-- Precio -->
+					});
+				
+				}
+				
+				<!-- Función para calcular el total de los precios de la comanda -->
+				$scope.getTotal = function(){
+					var total = 0; <!-- Inicialmente el precio es 0 -->
+					for (var i = 0; i < $scope.listaPrecios.length; ++i){ <!-- Traversamos todos los precios de los productos añadidos -->
+						var product = parseFloat($scope.listaPrecios[i]); <!-- Obtenemos el elemento correspondiente de listaPrecios -->
+						total += product; <!-- Añadimos el precio de dicho producto al producto -->
+					}
+					return total+"€"; <!-- Añadimos el € que quitamos antes -->
+				}
+				
+				<!-- Función para eliminar un producto de la comanda -->
+				$scope.delItem = function(i){
+					$scope.listaComida.splice(i,1); <!-- Eliminar el producto de listaComida -->
+					$scope.listaPrecios.splice(i,1); <!-- Eliminar el producto de listaPrecios -->
+				}
+			});
+		</script>
+	</head>
+
+	<body ng-controller="myController"> <!-- Aplicación -->
+		<div id="box0" class="left"> <!-- Caja naranja donde sucede toda la implementación -->
+			<h1 class="title">COMANDA</h1> <!-- Título -->
+
+			<span class="left-centered">Consumición:</span>
+			<select class="select" data-ng-model="selectedFood"> <!-- Dropdown menu -->
+				<!-- Opciones del dropdown menu, que se rellena mediante ng-repeat, usando los elementos de items -->
+				<option ng-repeat="item in items" value="{{item.Desc + item.Price}}">{{item.Desc}} ({{item.Price}})</option> 
+			<select>
+			
+			<!-- Tras pulsar el botón (+), las functiones addToCard() [añadir elemento a la comanda] y getTotal() [calcular precio total] se ejecutan -->
+			<button class="button" ng-click="addToCart(); getTotal()" > + </button><br> 
+		
+			<h3 style="margin-left:5%">Consumiciones:</h3> <!-- Lista de consumiciones -->
+			<!-- Columnas producto y precio -->
+			<span class="producto">Producto</span>
+			<span class="precio">Precio</span>
+			<!-- Rellenamos la lista de consumiciones con los elementos obtenidos de listaComida -->
+			<span ng-repeat="item in listaComida">
+				<span class="producto-lista">{{item.Desc}}</span>
+				<!-- Tras pulsar el botón (-), la función delItem(), se ejecuta. Necesitamos proporcionarle el índice del elemento a borrar, i -->
+				<button class="right right-space" *ngFor='let i=index' ng-click="delItem(i)"> - </button>
+				<span class="precio-lista">{{item.Price}}</span>
+				<br><br>
+			</span>
+			
+			<!-- Precio total -->
+			<span class="producto-lista bold">TOTAL</span>
+			<span class="precio-lista-total bold">{{getTotal()}}</span> <!-- Obtenemos el precio total de la función getTotal() -->
+		</div>
+	</body>
+</html>

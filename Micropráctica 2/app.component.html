@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Estilos CSS -->
+		<style>
+			#box0{background-color:rgb(244, 122, 66);width:96%;padding:2%}
+			.left-centered{float:left; padding-left:40%}
+			.button{margin-left:2%}
+			.text-green{color:green}
+			.text-red{color:red}
+			
+			table {
+				border-collapse: collapse;
+				width: 100%;
+			}
+
+			td, th {
+				border: 1.5px solid white;
+				text-align: center;
+				padding: 8px;
+			}
+		</style>
+	</head>
+
+	<body> <!-- Aplicación -->
+		<div id="box0" class="left"> <!-- Caja naranja donde sucede toda la implementación -->
+			<!-- Input para el filtrado. Incluye la función onSearchChange, que se activa cada vez que el input cambia -->
+			<span class="left-centered">Filtrar por: <input placeholder="Marca de coche" (input)="onSearchChange($event.target.value)"><br><br></span>
+			<!-- Tabla -->
+			<table>
+			<!-- Columnas superiores con los títulos de los campos -->
+			  <tr>
+				<th>Foto</th>
+				<th>Marca</th>
+				<th>Modelo</th>
+				<th>Año</th>
+				<th>En venta desde</th>
+				<th>Precio</th>
+				<th>PVP</th>
+				<th>Acciones</th>
+			  </tr>
+			  <tr *ngFor='let coche of coches_filtrados let i=index'> <!-- Rellenamos el resto de columnas usando *ngFor del array de coches_filtrados -->
+				<!-- Campo de foto. Checkea si no hay foto para escribir 'Sin Foto'. En cualquier otro caso, muestra la imagen proporcionada. -->
+				<th *ngIf='[coche.foto]!=""; else elseBlock'><img style="width:150px" src={{coche.foto}}></th>
+				<!-- Para cuando no hay foto -->
+				<ng-template #elseBlock><th>Sin foto</th></ng-template>
+				<th>{{coche.marca | uppercase}}</th> <!-- Marca, con pipe para mayúsculas -->
+				<th>{{coche.modelo | lowercase}}</th> <!-- Marca, con pipe para minúsculas -->
+				<th>{{coche.fecha_modelo | date:'yyyy'}}</th> <!-- Año, con pipe para la fecha (sólo año) -->
+				<th>{{coche.fecha_venta | date:'MM-yyyy'}}</th> <!-- Fecha de venta, con pipe para la fecha (sólo mes y año) -->
+				<!-- Precio, con el checkeamos si el estado es BUENO (0) o MALO (1); de modo que asignamos una clase de CSS dependiendo de ello -->
+				<!-- También está formateado con la pipe de number, de modo que no muestre decimales. La pipe currency no hace que el € vaya a la derecha, por lo que no es útil. -->
+				<th [ngClass] ="{'text-green':coche.estado === 0, 'text-red':coche.estado === 1}">{{coche.precio | number:'4.0-0'}}€</th>
+				<th>{{coche.getPVP() | number:'4.0-0'}}€</th> <!-- PVP, con el mismo formato que precio -->
+				<th>
+					<button (click)="rebajar(i)" > Rebajar </button> <!-- Botón "Rebajar", que activa la función rebajar(i) -->
+					<button class="button" (click)="delItem(i)" > Vendido </button> <!-- Botón "Vendido", que activa la función delItem(i) -->
+				</th>
+			  </tr>
+			</table>
+		</div>
+	</body>
+</html>
